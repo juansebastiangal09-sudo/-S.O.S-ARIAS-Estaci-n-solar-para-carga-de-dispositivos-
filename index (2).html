@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S.O.S Solar · Estación solar de emergencia</title>
+<meta name="description" content="Estación solar institucional que carga dispositivos cuando falla la red eléctrica. Proyecto educativo de Bogotá, Colombia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0c2340; --day:#8ecdf0; --sun:#ffb703; --ink:#14233a; --paper:#f7fafc;
+  --alt:#e8f1f6; --leaf:#1f8a70; --line:#c6d6e0; --focus:#d9480f;
+  --head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --sky-top:#8ecdf0; --sky-bot:#dff2fb;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:1.1875rem/1.75 var(--body);color:var(--ink);background:var(--paper)}
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0 0 .6em}
+h1{font-size:clamp(2.2rem,5.5vw,3.8rem);font-weight:800;max-width:16ch}
+h2{font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:800}
+h3{font-size:1.2rem;font-weight:600}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:space-between;align-items:center;padding:.7rem clamp(1rem,4vw,3rem);background:rgba(247,250,252,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.brand{font:800 1.2rem var(--head);text-decoration:none}
+.top nav{display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.top nav a{text-decoration:none;font-weight:600;padding:.2rem 0;border-bottom:2px solid transparent}
+.top nav a:hover{border-color:var(--sun)}
+
+/* Héroe con cielo */
+.hero{position:relative;overflow:hidden;min-height:92vh;display:flex;align-items:flex-end;color:var(--ink)}
+.sky{position:absolute;inset:0;background:linear-gradient(var(--sky-top),var(--sky-bot));transition:background .25s}
+.sun{position:absolute;width:84px;height:84px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 14px rgba(255,183,3,.25),0 0 70px 20px rgba(255,183,3,.45);left:50%;top:40%}
+.hill{position:absolute;left:-10%;right:-10%;bottom:-8%;height:30%;background:#173a2f;border-radius:50% 50% 0 0}
+.panel-ico{position:absolute;right:8%;bottom:12%;width:130px;height:70px;background:repeating-linear-gradient(90deg,#1b3f6b 0 30px,#fff3 30px 32px),#1b3f6b;border:3px solid #cdd9e4;transform:skewX(-18deg);box-shadow:0 8px 0 #0a1c33}
+.hero-body{position:relative;z-index:2;width:100%;max-width:960px;margin:0 auto;padding:clamp(3rem,10vh,6rem) clamp(1rem,4vw,2rem) 2.5rem}
+.hero-body>p{max-width:46ch;font-size:1.2rem}
+body.night .hero{color:#f3f7fb}
+
+.sim{margin-top:1.5rem;padding:1.2rem 1.4rem;background:rgba(255,255,255,.9);color:var(--ink);border-radius:14px;max-width:560px;box-shadow:0 10px 30px rgba(8,25,45,.25)}
+.sim label{display:block;margin-bottom:.4rem}
+input[type=range]{width:100%;accent-color:var(--sun);height:2rem}
+.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:.6rem 0 0}
+.readout div{border-left:4px solid var(--sun);padding-left:.6rem}
+.readout dt{font-size:.8rem;color:#4a5d73}
+.readout dd{margin:0;font:800 1.15rem var(--head)}
+.note{font-size:.85rem;color:#4a5d73;margin:.8rem 0 0}
+
+/* Secciones */
+.wrap{max-width:960px;margin:0 auto;padding:4rem clamp(1rem,4vw,2rem)}
+.alt{max-width:none;background:var(--alt)}
+.alt>*{max-width:896px;margin-left:auto;margin-right:auto}
+.lead{font-size:1.1rem;max-width:60ch}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.ticks{list-style:none;padding:0;margin:0}
+.ticks li{padding:.35rem 0 .35rem 1.6rem;position:relative}
+.ticks li::before{content:"";position:absolute;left:0;top:.8rem;width:.8rem;height:.45rem;border-left:3px solid var(--leaf);border-bottom:3px solid var(--leaf);transform:rotate(-45deg)}
+.wins{list-style:none;padding:0;margin:2rem 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem}
+.wins li{padding:1rem;border-top:4px solid var(--leaf);background:#fff;font-weight:600}
+
+/* Flujo */
+.audience{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin:.5rem 0 1.4rem}
+.seg{font:600 .95rem var(--body);padding:.5rem 1.1rem;border:0;background:transparent;cursor:pointer;color:var(--ink)}
+.seg.on{background:var(--ink);color:#fff}
+.flow{list-style:none;display:flex;flex-wrap:wrap;gap:.5rem;padding:0;margin:0 0 1rem}
+.flow li{display:flex;align-items:center;gap:.5rem}
+.flow li:not(:last-child)::after{content:"";width:1.6rem;height:3px;background:var(--sun);border-radius:2px}
+.flow button{font:600 1rem var(--body);padding:.7rem 1rem;border:2px solid var(--ink);background:#fff;border-radius:10px;cursor:pointer;transition:transform .15s,background .15s}
+.flow button:hover{transform:translateY(-2px)}
+.flow button.on{background:var(--sun);border-color:var(--sun)}
+.detail{background:#fff;border-left:6px solid var(--sun);padding:1.2rem 1.4rem;border-radius:0 12px 12px 0;min-height:7.5rem}
+.detail p{margin:0;max-width:62ch}
+.challenge{margin:2.5rem 0;padding:1.4rem 1.6rem;background:var(--night);color:#eaf2f9;border-radius:14px}
+.challenge h3{color:var(--sun)}
+.challenge p{margin:0;max-width:64ch}
+.tbl{width:100%;border-collapse:collapse;background:#fff}
+.tbl th,.tbl td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--line)}
+.tbl th{background:#dbe8f0}
+
+/* Calculadora */
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0}
+.calc label{display:flex;flex-direction:column;font-weight:600;font-size:.95rem;gap:.3rem}
+.calc input,.search input{font:1rem var(--body);padding:.6rem .7rem;border:2px solid var(--line);border-radius:8px;background:#fff}
+.calc input:focus,.search input:focus{border-color:var(--ink)}
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem}
+.results div{background:var(--ink);color:#fff;padding:1.1rem;border-radius:12px}
+.results span{display:block;font:800 1.9rem var(--head);color:var(--sun)}
+.results small{font-size:.9rem}
+
+/* Glosario */
+.search{margin-bottom:1rem}
+.search input{width:100%;max-width:420px}
+details{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:.6rem}
+summary{cursor:pointer;padding:.9rem 1.1rem;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";font-size:1.3rem;line-height:1}
+details[open] summary::after{content:"–"}
+details p{margin:0;padding:0 1.1rem 1rem;max-width:62ch}
+
+.team{list-style:none;display:flex;flex-wrap:wrap;gap:.8rem;padding:0}
+.team li{padding:.8rem 1.2rem;border:2px solid var(--ink);border-radius:999px;font-weight:600}
+footer{padding:2rem;text-align:center;background:var(--night);color:#cfe0ee}
+footer p{margin:0}
+
+@media (max-width:720px){
+  .cols{grid-template-columns:1fr}
+  .readout{grid-template-columns:1fr}
+  .flow li:not(:last-child)::after{display:none}
+  .panel-ico{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
+
+/* Lectura más cómoda */
+p,li{max-width:62ch}
+.wrap{padding:5rem clamp(1.2rem,4vw,2rem)}
+h2{margin-bottom:.8em}
+.detail h3{font-size:1.5rem}
+.detail p{font-size:1.2rem}
+.sp{margin-top:3rem}
+.big{font:800 1.4rem/1.3 var(--head);margin:1rem 0 0}
+.flow button{font-size:1.1rem;padding:.8rem 1.1rem}
+
+/* Juego */
+.chips{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.2rem 0}
+.chips button{font:600 1.1rem var(--body);padding:.9rem 1.2rem;border:2px solid var(--ink);background:#fff;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:130px;transition:transform .15s,background .15s}
+.chips button small{font-weight:400;color:#4a5d73}
+.chips button:hover{transform:translateY(-3px)}
+.chips button[aria-pressed=true]{background:var(--sun);border-color:var(--sun);transform:scale(1.04)}
+.meter{height:30px;background:#dbe8f0;border-radius:999px;overflow:hidden;border:2px solid var(--ink)}
+#bar{height:100%;width:0;background:var(--leaf);transition:width .4s,background .4s}
+
+/* Quiz */
+.quiz{background:var(--night);color:#eaf2f9;padding:1.6rem;border-radius:16px;max-width:680px}
+.quiz .q{font:800 1.35rem/1.3 var(--head);margin:0 0 1rem}
+.quiz .step{font-size:.9rem;color:#a9c3d8;margin:0 0 .4rem}
+.quiz .opt{display:block;width:100%;text-align:left;font:1.1rem var(--body);padding:.85rem 1rem;margin:.5rem 0;border:2px solid #4b6b8a;background:transparent;color:inherit;border-radius:10px;cursor:pointer}
+.quiz .opt:hover:not(:disabled){border-color:var(--sun)}
+.quiz .opt.ok{background:#1f8a70;border-color:#1f8a70;color:#fff}
+.quiz .opt.no{background:#9b2c2c;border-color:#9b2c2c;color:#fff}
+.quiz .fb{margin:1rem 0 0}
+.quiz .next{margin-top:1rem;font:600 1.1rem var(--body);padding:.7rem 1.4rem;border:0;border-radius:999px;background:var(--sun);color:var(--ink);cursor:pointer}
+
+
+.top{box-shadow:0 2px 14px rgba(12,35,64,.08)}
+.top nav a{padding:.35rem .8rem;border-radius:999px;border:0}
+.top nav a:hover{background:var(--sun)}
+.hero-body h1{text-shadow:0 2px 0 rgba(255,255,255,.35)}
+body.night .hero-body h1{text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.sim{border-radius:22px;border:3px solid var(--sun)}
+.warm{background:#fff3d1}
+.mint{background:#e1f4ec}
+.wins li{border-radius:16px;box-shadow:0 6px 20px rgba(12,35,64,.08);font-size:1.1rem}
+.wins li,.results div,details,.detail,.chips button{transition:transform .2s}
+.cols>p{font-size:1.25rem}
+.ticks li{font-size:1.1rem}
+.detail{border-radius:16px;border-left-width:8px;box-shadow:0 6px 20px rgba(12,35,64,.08)}
+.challenge{border-radius:22px;padding:2rem}
+.tbl{border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(12,35,64,.08)}
+.tbl tr:nth-child(even) td{background:#f3f8fb}
+.results div{border-radius:18px;text-align:center}
+.results span{font-size:2.2rem}
+.calc input{border-radius:12px;font-size:1.1rem}
+details{border-radius:14px;box-shadow:0 3px 12px rgba(12,35,64,.06)}
+details[open]{border-color:var(--sun);box-shadow:0 6px 18px rgba(255,183,3,.25)}
+summary{font-size:1.15rem}
+.quiz{border-radius:22px;box-shadow:0 10px 30px rgba(12,35,64,.25)}
+.team li{background:#fff;box-shadow:0 4px 14px rgba(12,35,64,.1);font-size:1.1rem}
+footer{font-size:1rem}
+
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#inicio">☀️ S.O.S Solar</a>
+  <nav aria-label="Principal">
+    <a href="#simulador">Un día de sol</a>
+    <a href="#sistema">El sistema</a>
+    <a href="#calculadora">Calculadora</a>
+    <a href="#juega">Juega</a>
+    <a href="#glosario">Glosario</a>
+    <a href="#equipo">Equipo</a>
+  </nav>
+</header>
+
+<main>
+<section id="inicio" class="hero" aria-labelledby="titulo">
+  <div class="sky" id="sky" aria-hidden="true">
+    <div class="sun" id="sun"></div>
+    <div class="hill"></div>
+    <div class="panel-ico"></div>
+  </div>
+  <div class="hero-body">
+    <h1 id="titulo">Cuando falla la luz, el sol sigue ahí.</h1>
+    <p>S.O.S Solar es una estación del colegio que capta energía del sol, la guarda en baterías y carga celulares, tabletas y portátiles durante cortes y emergencias.</p>
+
+    <div class="sim" id="simulador">
+      <label for="hora">Mueve el sol: <strong id="horaTxt">12:00</strong></label>
+      <input type="range" id="hora" min="5" max="19" step="0.25" value="12">
+      <dl class="readout">
+        <div><dt>Potencia del panel</dt><dd id="outP">0 W</dd></div>
+        <div><dt>Energía captada hoy</dt><dd id="outE">0 Wh</dd></div>
+        <div><dt>Estado</dt><dd id="outS">Esperando el sol</dd></div>
+      </dl>
+      <p class="note">Simulación ilustrativa con un panel de 200 W y 4 horas sol pico. Los valores reales dependen del clima.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" aria-labelledby="h-quien">
+  <h2 id="h-quien">🏫 Para quién y para qué</h2>
+  <div class="cols">
+    <p>La institución no tenía una fuente de respaldo ni una alternativa sostenible para emergencias. La estación sirve a estudiantes, docentes, personal administrativo y de logística.</p>
+    <ul class="ticks">
+      <li>Funciona con energía renovable.</li>
+      <li>Es autónoma: capta, regula, almacena y entrega.</li>
+      <li>Está pensada para el clima y los componentes disponibles en Bogotá.</li>
+      <li>Entrega onda senoidal pura para no dañar equipos sensibles.</li>
+    </ul>
+  </div>
+  <ul class="wins" aria-label="Logros">
+    <li>🛠️ Prototipo funcional construido</li>
+    <li>🔋 Pruebas de carga exitosas en distintas baterías</li>
+    <li>📐 Esquemático y PCB del inversor diseñados</li>
+    <li>✅ Sistema completo en marcha</li>
+  </ul>
+</section>
+
+<section id="sistema" class="wrap alt" aria-labelledby="h-sis">
+  <h2 id="h-sis">⚡ Cómo viaja la energía</h2>
+  <p class="lead">Toca cada etapa para ver qué hace.</p>
+
+  <div class="audience" role="group" aria-label="Nivel de detalle">
+    <button class="seg on" data-aud="gen" aria-pressed="true">Explícamelo fácil</button>
+    <button class="seg" data-aud="tec" aria-pressed="false">Detalle técnico</button>
+  </div>
+
+  <ol class="flow" id="flow">
+    <li><button data-i="0" class="on">☀️ Panel solar</button></li>
+    <li><button data-i="1">🎛️ Controlador</button></li>
+    <li><button data-i="2">🔋 Batería</button></li>
+    <li><button data-i="3">🔄 Inversor SPWM</button></li>
+    <li><button data-i="4">📱 Tus dispositivos</button></li>
+  </ol>
+  <article class="detail" id="detail" aria-live="polite">
+    <h3 id="dT"></h3>
+    <p id="dP"></p>
+  </article>
+
+  <div class="challenge">
+    <h3>🧩 El reto: no había baterías LiFePO4</h3>
+    <p>Escaseaban en el mercado local. Usamos un banco VRLA/AGM y lo cuidamos con ingeniería de control: limitamos la profundidad de descarga y ajustamos con precisión los umbrales de carga. Resultado: buena eficiencia con piezas disponibles y sin comprometer la seguridad.</p>
+  </div>
+
+  <h3>🔬 Validamos lo que construimos</h3>
+  <table class="tbl">
+    <thead><tr><th>Medimos</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td>Tensión panel → controlador</td><td>Confirmar que la captación entrega lo esperado</td></tr>
+      <tr><td>Etapas de carga hacia la batería</td><td>Proteger la batería y alargar su vida útil</td></tr>
+      <tr><td>Forma de onda con osciloscopio</td><td>Asegurar onda senoidal pura</td></tr>
+      <tr><td>Dispositivos reales conectados</td><td>Comprobar el uso cotidiano</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="calculadora" class="wrap alt warm" aria-labelledby="h-calc">
+  <h2 id="h-calc">🧮 Calcula cuánto aguanta</h2>
+  <p class="lead">Cambia los datos y mira la autonomía con el sol de Bogotá. Los valores iniciales son de ejemplo: reemplázalos con los del prototipo.</p>
+  <form class="calc" id="calc" onsubmit="return false">
+    <label>Panel (W)<input type="number" id="cP" value="200" min="10"></label>
+    <label>Horas sol pico al día<input type="number" id="cH" value="4" min="1" max="7" step="0.1"></label>
+    <label>Rendimiento del sistema (%)<input type="number" id="cPR" value="70" min="40" max="95"></label>
+    <label>Batería (V)<input type="number" id="cV" value="12" min="6"></label>
+    <label>Batería (Ah)<input type="number" id="cAh" value="100" min="1"></label>
+    <label>Descarga máxima (%)<input type="number" id="cD" value="50" min="10" max="100"></label>
+    <label>Eficiencia del inversor (%)<input type="number" id="cE" value="85" min="50" max="99"></label>
+    <label>Consumo conectado (W)<input type="number" id="cL" value="50" min="1"></label>
+  </form>
+  <div class="results" aria-live="polite">
+    <div><span id="rGen">–</span><small>Energía generada por día</small></div>
+    <div><span id="rUtil">–</span><small>Energía útil almacenada</small></div>
+    <div><span id="rAut">–</span><small>Autonomía</small></div>
+    <div><span id="rRec">–</span><small>Días de sol para recargar</small></div>
+  </div>
+  <p class="note" id="rTxt"></p>
+</section>
+
+<section id="juega" class="wrap alt mint" aria-labelledby="h-juega">
+  <h2 id="h-juega">🎮 Juega y aprende</h2>
+
+  <h3>🔌 ¿Qué conectarías en una emergencia?</h3>
+  <p class="lead">Toca los aparatos que quieres cargar y mira cuánto aguanta la batería. Usa los datos de la calculadora.</p>
+  <div class="chips" id="chips">
+    <button data-w="10" aria-pressed="false">📱 Celular <small>10 W</small></button>
+    <button data-w="15" aria-pressed="false">📟 Tableta <small>15 W</small></button>
+    <button data-w="60" aria-pressed="false">💻 Portátil <small>60 W</small></button>
+    <button data-w="10" aria-pressed="false">💡 Lámpara LED <small>10 W</small></button>
+    <button data-w="30" aria-pressed="false">🌀 Ventilador <small>30 W</small></button>
+  </div>
+  <div class="meter" role="img" aria-label="Nivel de autonomía"><div id="bar"></div></div>
+  <p class="big" id="gTxt" aria-live="polite">Elige al menos un aparato.</p>
+
+  <h3 class="sp">🧠 Pon a prueba lo que aprendiste</h3>
+  <div class="quiz" id="quiz" aria-live="polite"></div>
+</section>
+
+<section id="glosario" class="wrap alt" aria-labelledby="h-glo">
+  <h2 id="h-glo">📚 Glosario para empezar</h2>
+  <div class="search"><label for="q" class="sr">Buscar término</label><input type="search" id="q" placeholder="Busca: batería, AC, inversor…"></div>
+  <div id="glos">
+    <details data-k="batería"><summary>Batería</summary><p>Un tanque de energía eléctrica. Guarda lo que producen los paneles de día para usarlo de noche o en un corte. Usamos baterías VRLA/AGM: plomo-ácido selladas, sin líquido que rellenar.</p></details>
+    <details data-k="ac dc corriente"><summary>AC y DC</summary><p>DC fluye siempre en un sentido (paneles, baterías, USB). AC cambia de sentido muchas veces por segundo (el tomacorriente de la pared). El inversor convierte de DC a AC.</p></details>
+    <details data-k="controlador carga"><summary>Controlador de carga</summary><p>El guardián de la batería. Reparte la energía del panel por etapas para no sobrecargarla y que dure más años.</p></details>
+    <details data-k="inversor senoidal spwm onda"><summary>Inversor de onda senoidal pura</summary><p>Convierte la energía de la batería en una onda suave y limpia, igual a la de la red. Protege portátiles y cargadores delicados.</p></details>
+    <details data-k="autosuficiencia autonomía"><summary>Autosuficiencia</summary><p>Producir y guardar la energía que necesitas sin depender de la red eléctrica.</p></details>
+  </div>
+  <p id="noRes" class="note" hidden>No encontramos ese término. Prueba con otra palabra.</p>
+</section>
+
+<section id="equipo" class="wrap" aria-labelledby="h-eq">
+  <h2 id="h-eq">👥 Quiénes lo hicimos</h2>
+  <ul class="team">
+    <li>Juan David Castañeda</li>
+    <li>Juan Arias</li>
+    <li>Juan José Torres</li>
+  </ul>
+  <p>Estudiantes de Bogotá, Colombia. Proyecto institucional y educativo.</p>
+</section>
+</main>
+
+<footer>
+  <p>S.O.S Solar · Bogotá, Colombia</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var lerp = function (a, b, t) { return Math.round(a + (b - a) * t); };
+  var mix = function (c1, c2, t) {
+    return "rgb(" + lerp(c1[0], c2[0], t) + "," + lerp(c1[1], c2[1], t) + "," + lerp(c1[2], c2[2], t) + ")";
+  };
+
+  /* ===== 1. Simulador: un día de sol ===== */
+  var PANEL_W = 200, HSP = 4, PR = 0.7;
+  var K = HSP * Math.PI / 24; // kW/m² pico para que el día sume HSP
+
+  function irr(h) { // irradiancia 6:00–18:00
+    if (h <= 6 || h >= 18) return 0;
+    return K * Math.sin(Math.PI * (h - 6) / 12);
+  }
+  function energy(h) { // Wh acumulados hasta h
+    if (h <= 6) return 0;
+    var e = Math.min(h, 18);
+    var integral = (12 / Math.PI) * (1 - Math.cos(Math.PI * (e - 6) / 12));
+    return PANEL_W * PR * K * integral;
+  }
+  function fmtHora(h) {
+    var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+  }
+
+  var NIGHT_TOP = [12, 35, 64], NIGHT_BOT = [38, 60, 95];
+  var DAY_TOP = [142, 205, 240], DAY_BOT = [223, 242, 251];
+
+  function updateSim() {
+    var h = parseFloat($("hora").value);
+    var p = PANEL_W * PR * (irr(h) / K) ; // pico = PANEL_W*PR
+    var light = irr(h) / K; // 0..1
+    var t = Math.min(1, light * 1.6);
+    var root = document.documentElement.style;
+    root.setProperty("--sky-top", mix(NIGHT_TOP, DAY_TOP, t));
+    root.setProperty("--sky-bot", mix(NIGHT_BOT, DAY_BOT, t));
+    document.body.classList.toggle("night", t < 0.45);
+
+    var frac = (h - 5) / 14;
+    var sun = $("sun");
+    sun.style.left = "calc(" + (frac * 100) + "% - 42px)";
+    sun.style.top = (62 - Math.sin(Math.PI * frac) * 50) + "%";
+    sun.style.opacity = h > 5.5 && h < 18.5 ? 1 : 0.15;
+
+    $("horaTxt").textContent = fmtHora(h);
+    $("outP").textContent = Math.round(p) + " W";
+    $("outE").textContent = Math.round(energy(h)) + " Wh";
+    $("outS").textContent = p > 100 ? "Cargando a tope"
+      : p > 5 ? "Cargando batería"
+      : h >= 18 ? "Usando lo almacenado" : "Esperando el sol";
+  }
+  $("hora").addEventListener("input", updateSim);
+  updateSim();
+
+  /* ===== 2. Flujo de energía con dos niveles ===== */
+  var STAGES = [
+    { t: "Panel solar",
+      g: "Es como la lluvia que llena un tanque: capta la luz del sol y la convierte en electricidad.",
+      x: "Capta radiación y entrega tensión DC variable según la irradiancia. Se mide la tensión de entrada Panel → Controlador." },
+    { t: "Controlador de carga",
+      g: "Es la válvula del tanque: decide cuánta energía entra a la batería para que no se llene de más.",
+      x: "Regula la carga por etapas (bulk, absorción, flotación) con umbrales ajustados para VRLA/AGM y protege la vida útil." },
+    { t: "Batería",
+      g: "Es el tanque donde se guarda la energía para usarla cuando no hay sol ni red.",
+      x: "Banco VRLA/AGM con profundidad de descarga (DoD) limitada y corte por subtensión; sustituye a LiFePO4 por falta de stock." },
+    { t: "Inversor SPWM",
+      g: "Es la bomba que entrega la energía con la forma correcta para tus aparatos, suave y limpia.",
+      x: "Puente H con MOSFETs gobernado por EGS002 (SPWM) y filtro LC; la onda senoidal pura se verifica con osciloscopio." },
+    { t: "Tus dispositivos",
+      g: "Son las llaves de agua: conectas el celular, la tableta o el portátil y se cargan con normalidad.",
+      x: "Cargas AC por el inversor y cargas DC directas desde la batería; probado con dispositivos reales conectados." }
+  ];
+  var aud = "gen", cur = 0;
+
+  function renderStage() {
+    $("dT").textContent = (cur + 1) + ". " + STAGES[cur].t;
+    $("dP").textContent = STAGES[cur][aud === "gen" ? "g" : "x"];
+    document.querySelectorAll("#flow button").forEach(function (b) {
+      b.classList.toggle("on", +b.dataset.i === cur);
+    });
+  }
+  $("flow").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    cur = +b.dataset.i;
+    renderStage();
+  });
+  document.querySelectorAll(".seg").forEach(function (b) {
+    b.addEventListener("click", function () {
+      aud = b.dataset.aud;
+      document.querySelectorAll(".seg").forEach(function (s) {
+        var on = s === b;
+        s.classList.toggle("on", on);
+        s.setAttribute("aria-pressed", on);
+      });
+      renderStage();
+    });
+  });
+  renderStage();
+
+  /* ===== 3. Calculadora de autonomía ===== */
+  var ids = ["cP", "cH", "cPR", "cV", "cAh", "cD", "cE", "cL"];
+  function num(id) { return parseFloat($(id).value); }
+  function fmtH(h) {
+    if (!isFinite(h)) return "–";
+    var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    return hh + " h " + mm + " min";
+  }
+  function calc() {
+    var v = ids.map(num);
+    if (v.some(function (x) { return !isFinite(x) || x <= 0; })) {
+      ["rGen", "rUtil", "rAut", "rRec"].forEach(function (r) { $(r).textContent = "–"; });
+      $("rTxt").textContent = "Completa todos los campos con números mayores que cero.";
+      return;
+    }
+    var gen = v[0] * v[1] * (v[2] / 100);
+    var util = v[3] * v[4] * (v[5] / 100) * (v[6] / 100);
+    var aut = util / v[7];
+    var rec = (v[3] * v[4] * (v[5] / 100)) / gen;
+    $("rGen").textContent = Math.round(gen) + " Wh";
+    $("rUtil").textContent = Math.round(util) + " Wh";
+    $("rAut").textContent = fmtH(aut);
+    $("rRec").textContent = rec.toFixed(1) + " días";
+    $("rTxt").textContent = "Con " + v[7] + " W conectados, la estación aguanta unas " +
+      fmtH(aut) + " y se recarga en cerca de " + rec.toFixed(1) + " días de sol.";
+  }
+  ids.forEach(function (id) { $(id).addEventListener("input", calc); });
+  calc();
+
+  /* ===== 4. Buscador de glosario ===== */
+  $("q").addEventListener("input", function () {
+    var q = this.value.trim().toLowerCase(), shown = 0;
+    document.querySelectorAll("#glos details").forEach(function (d) {
+      var hit = !q || (d.dataset.k + " " + d.textContent).toLowerCase().indexOf(q) > -1;
+      d.hidden = !hit;
+      if (hit) shown++;
+      d.open = !!q && hit;
+    });
+    $("noRes").hidden = shown > 0;
+  });
+})();
+
+/* ===== 5. Juego de aparatos y quiz ===== */
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  function usable() {
+    var f = function (id) { return parseFloat($(id).value) || 0; };
+    return f("cV") * f("cAh") * (f("cD") / 100) * (f("cE") / 100);
+  }
+  function fmtH(h) { return Math.floor(h) + " h " + Math.round((h % 1) * 60) + " min"; }
+  function game() {
+    var W = 0, n = 0;
+    document.querySelectorAll("#chips button").forEach(function (b) {
+      if (b.getAttribute("aria-pressed") === "true") { W += +b.dataset.w; n++; }
+    });
+    var bar = $("bar"), txt = $("gTxt");
+    if (!n) { bar.style.width = "0"; txt.textContent = "Elige al menos un aparato."; return; }
+    var h = usable() / W;
+    bar.style.width = Math.min(100, h / 24 * 100) + "%";
+    bar.style.background = h >= 8 ? "#1f8a70" : h >= 3 ? "#ffb703" : "#d9480f";
+    txt.textContent = "Consumes " + W + " W y la batería aguanta unas " + fmtH(h) + "." +
+      (h >= 8 ? " ¡Una jornada completa!" : h >= 3 ? " Alcanza para varias horas." : " Poco tiempo: quita algún aparato.");
+  }
+  $("chips").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+    game();
+  });
+  ["cV", "cAh", "cD", "cE"].forEach(function (id) { $(id).addEventListener("input", game); });
+
+  var Q = [
+    { q: "¿Qué hace el controlador de carga?", o: ["Convierte DC en AC", "Cuida la batería repartiendo la carga por etapas", "Capta la luz del sol"], a: 1, e: "Es el guardián de la batería: evita sobrecargas y alarga su vida." },
+    { q: "¿Qué tipo de corriente entrega un panel solar?", o: ["DC (continua)", "AC (alterna)", "Ninguna"], a: 0, e: "Paneles y baterías trabajan en DC. Por eso hace falta el inversor para los aparatos AC." },
+    { q: "¿Por qué la onda senoidal pura es importante?", o: ["Hace la luz más brillante", "Protege equipos sensibles como portátiles", "Gasta más energía"], a: 1, e: "Es una onda limpia, igual a la de la red, y no daña los aparatos delicados." },
+    { q: "¿Por qué usamos baterías VRLA/AGM?", o: ["No había LiFePO4 disponibles en el mercado local", "Son las más modernas", "No necesitan controlador"], a: 0, e: "Nos adaptamos: limitamos la descarga y ajustamos la carga para usarlas con seguridad." }
+  ];
+  var i = 0, score = 0, box = $("quiz");
+  function show() {
+    if (i >= Q.length) {
+      box.innerHTML = '<p class="q">Sacaste ' + score + ' de ' + Q.length + (score === Q.length ? ' 🌞 ¡Experto solar!' : score >= 2 ? ' ⚡ ¡Muy bien!' : ' 🌱 Repasa el sistema y vuelve a intentar') + '</p><button class="next" id="again">Jugar de nuevo</button>';
+      $("again").onclick = function () { i = 0; score = 0; show(); };
+      return;
+    }
+    var d = Q[i];
+    box.innerHTML = '<p class="step">Pregunta ' + (i + 1) + ' de ' + Q.length + '</p><p class="q">' + d.q + '</p>' +
+      d.o.map(function (t, k) { return '<button class="opt" data-k="' + k + '">' + t + '</button>'; }).join("") + '<div id="fb"></div>';
+    box.querySelectorAll(".opt").forEach(function (b) {
+      b.onclick = function () {
+        var k = +b.dataset.k, ok = k === d.a;
+        if (ok) score++;
+        box.querySelectorAll(".opt").forEach(function (x) {
+          x.disabled = true;
+          if (+x.dataset.k === d.a) x.classList.add("ok");
+        });
+        if (!ok) b.classList.add("no");
+        $("fb").innerHTML = '<p class="fb"><strong>' + (ok ? "¡Correcto! " : "Casi. ") + '</strong>' + d.e + '</p><button class="next" id="nx">' + (i === Q.length - 1 ? "Ver resultado" : "Siguiente") + '</button>';
+        $("nx").onclick = function () { i++; show(); };
+        $("nx").focus();
+      };
+    });
+  }
+  show();
+})();
+
+</script>
+</body>
+</html>
